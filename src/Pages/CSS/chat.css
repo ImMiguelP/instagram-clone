@@ -1,0 +1,50 @@
+.message {
+    display: flex;
+    align-items: center;
+   
+  }
+  .sent {
+    flex-direction: row-reverse;
+  }
+  
+  .sentp {
+    background: #0b93f6;
+    align-self: flex-end;
+    max-width: 500px;
+    margin-bottom: 12px;
+    line-height: 24px;
+    padding: 10px 20px;
+    border-radius: 25px;
+    position: relative;
+    color: white;
+    text-align: center;
+   
+  }
+  .receivedp {
+    background: #e5e5ea;
+    color: black;
+    max-width: 500px;
+    margin-bottom: 12px;
+    line-height: 24px;
+    padding: 10px 20px;
+    border-radius: 25px;
+    position: relative;
+    text-align: center;
+  }
+  
+  .DmMessages {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    height: 80vh;
+    overflow: auto;
+    
+  }
+  
+  .DmMessages::-webkit-scrollbar{
+    display: none;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+   
+  

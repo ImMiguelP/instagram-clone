@@ -1,0 +1,9 @@
+.settingsTop {
+    display: flex;
+    align-items: center;
+  }
+  .settingsTopStatus {
+    color: white;
+    padding: 25px 15px;
+    text-align: start;  
+  }
