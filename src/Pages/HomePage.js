@@ -25,7 +25,6 @@ import {
 import MessagesPage from "./MessagesPage";
 import ExplorerPage from "./ExplorerPage";
 import SettingsPage from "./SettingsPage";
-import ProfilePage from "./ProfilePage";
 import Reels from "./Reels";
 import Feed from "./Feed";
 import FeedRN from "./NavBars/FeedRN";
@@ -35,6 +34,8 @@ import Error from "./Error";
 import MainNav from "./NavBars/MainNav";
 import Logout from "./Components/Logout";
 import MidNav from "./NavBars/MidNav";
+import SavedPosts from "./SavedPosts";
+import Userspage from "./Userspage";
 
 const HomePage = () => {
   return (
@@ -109,7 +110,8 @@ const HomePage = () => {
       <GridItem bg={"#1B1B1B"} className="Scroll">
         <Routes>
           <Route path="/" element={<Feed />} />
-          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/savedposts" element={<SavedPosts />} />
+          <Route path="/user/:username" element={<Userspage />} />
           <Route path="/explore" element={<ExplorerPage />} />
           <Route path="/reels" element={<Reels />} />
           <Route path="/messages" element={<MessagesPage />} />
@@ -122,6 +124,8 @@ const HomePage = () => {
           <Routes>
             <Route path="/" element={<FeedRN />} />
             <Route path="/profile" element={<ProfileRn />} />
+            <Route path="/user/:username" element={<ProfileRn />} />
+            <Route path="/savedposts" element={<RN />} />
             <Route path="/explore" element={<RN />} />
             <Route path="/reels" element={<RN />} />
             <Route path="/messages" element={<RN />} />

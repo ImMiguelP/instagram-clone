@@ -9,24 +9,24 @@ import {
   Link,
 } from "@chakra-ui/react";
 import useUser from "./Components/useUser";
-import IGProfilePosts from "./Components/IGProfilePosts";
-import { supabase } from "./SupaBaseClient";
 
-function ProfilePage(props) {
-  const { userData, loading, followers, follows } = useUser();
+import { supabase } from "./SupaBaseClient";
+import SavedPost from "./Components/SavedPost";
+
+function SavedPosts(props) {
+  const { userData, loading } = useUser();
   const [posts, setPosts] = useState([]);
   const hrefsite = userData ? "https://" + userData.website : "";
 
-  async function fetchPosts(callback) {
+  async function fetchSavedPosts(callback) {
     if (!userData) return;
 
     const { data } = await supabase
-      .from("posts")
+      .from("savedposts")
       .select(
-        `id, caption, created_at, photourl, profileid(username, avatarurl)`
+        `id, postid(id,caption, created_at, photourl), userid(username, avatarurl)`
       )
-      .filter("profileid", "eq", userData.id)
-      .order("created_at", { ascending: false });
+      .filter("userid", "eq", userData.id);
 
     callback(data);
   }
@@ -36,7 +36,7 @@ function ProfilePage(props) {
       return;
     }
 
-    fetchPosts(setPosts);
+    fetchSavedPosts(setPosts);
   }, [loading]);
   return (
     <Stack h={"100%"} w={"100%"} color={"white"}>
@@ -62,16 +62,16 @@ function ProfilePage(props) {
             <Box w={"100%"} align="middle">
               <HStack justify={"center"} spacing={10}>
                 <Link fontWeight={"bold"} fontSize={"20px"}>
-                  {posts.length} <br />
+                  45 <br />
                   Posts
                 </Link>
                 <Link fontWeight={"bold"} fontSize={"20px"}>
-                  {followers.length}
+                  1000
                   <br />
                   Followers
                 </Link>
                 <Link fontWeight={"bold"} fontSize={"20px"}>
-                  {follows.length}
+                  500
                   <br />
                   Following
                 </Link>
@@ -89,7 +89,7 @@ function ProfilePage(props) {
           }}
         >
           {posts.map((post) => {
-            return <IGProfilePosts post={post} prop={props} />;
+            return <SavedPost post={post} prop={props} />;
           })}
         </div>
       </Box>
@@ -97,4 +97,4 @@ function ProfilePage(props) {
   );
 }
 
-export default ProfilePage;
+export default SavedPosts;

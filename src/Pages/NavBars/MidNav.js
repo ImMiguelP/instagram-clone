@@ -62,7 +62,7 @@ function MidNav() {
                 {userData && <Avatar src={userData.avatarurl} size={"xs"} />}
               </MenuButton>
               <MenuList bg={"#171717"} border="none" borderRadius="xl">
-                <Link to="profile">
+                <Link to={`/user/${userData ? userData.username : ""}`}>
                   <MenuItem>Profile</MenuItem>
                 </Link>
                 <Link to="settings">

@@ -5,13 +5,20 @@ import {
   Avatar,
   Stack,
   HStack,
-  Link,
   Box,
   Text,
   IconButton,
   Input,
   Divider,
   FormControl,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  MenuItemOption,
+  MenuGroup,
+  MenuOptionGroup,
+  MenuDivider,
   Button,
 } from "@chakra-ui/react";
 import {
@@ -20,18 +27,33 @@ import {
   AiOutlineSmile,
   AiFillHeart,
 } from "react-icons/ai";
-import { FiMessageCircle, FiBookmark } from "react-icons/fi";
+import { FiMessageCircle } from "react-icons/fi";
+import { FaBookmark, FaRegBookmark } from "react-icons/fa";
+import { BiDotsHorizontalRounded } from "react-icons/bi";
 import { supabase } from "../SupaBaseClient";
 import Moment from "react-moment";
+import { Link } from "react-router-dom";
 
 function Posts(props) {
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState([]);
   const [likes, setLikes] = useState([]);
+  const [savedPost, setSavedPost] = useState([]);
   const [hasLiked, setHasLiked] = useState(false);
+  const [hasSaved, setHasSaved] = useState(false);
   const user = supabase.auth.user();
 
-  console.log(likes);
+  console.log(props.post.id);
+
+  // Delete Post
+
+  const deletePost = async () => {
+    const { data, error } = await supabase
+      .from("posts")
+      .delete()
+      .match({ id: props.post.id });
+    console.log(data, error);
+  };
 
   const fetchComments = useCallback(async () => {
     const { data } = await supabase
@@ -44,6 +66,8 @@ function Posts(props) {
 
     setComments(data);
   }, [props.post.id]);
+
+  // Liked Post Database
 
   const likePost = async () => {
     if (hasLiked) {
@@ -69,6 +93,33 @@ function Posts(props) {
     setLikes(data);
   }, [props.post.id]);
 
+  // Savedpost database
+
+  const savePost = async () => {
+    if (hasSaved) {
+      await supabase
+        .from("savedposts")
+        .delete()
+        .match({ postid: props.post.id, userid: user.id });
+    } else {
+      await supabase.from("savedposts").insert({
+        userid: user.id,
+        postid: props.post.id,
+      });
+    }
+    fetchSavedPosts();
+  };
+
+  const fetchSavedPosts = useCallback(async () => {
+    const { data } = await supabase
+      .from("savedposts")
+      .select(`id, postid, userid`)
+      .filter("postid", "eq", props.post.id);
+    setSavedPost(data);
+  }, [props.post.id]);
+
+  //comments Database
+
   const sendComment = async (e) => {
     e.preventDefault();
     const commentToSend = comment;
@@ -86,11 +137,16 @@ function Posts(props) {
   useEffect(() => {
     fetchComments();
     fetchLikes();
-  }, [fetchComments, fetchLikes]);
+    fetchSavedPosts();
+  }, [fetchComments, fetchLikes, fetchSavedPosts]);
 
   useEffect(() => {
     setHasLiked(likes.findIndex((like) => like.userid === user?.id) !== -1);
   }, [likes]);
+
+  useEffect(() => {
+    setHasSaved(savedPost.findIndex((save) => save.userid === user?.id) !== -1);
+  }, [savedPost]);
 
   return (
     <div>
@@ -110,10 +166,40 @@ function Posts(props) {
             src={props.post.profileid.avatarurl}
           />
           <VStack align={"start"}>
-            <Link>{props.post.profileid.username}</Link>
-            <Link fontSize={"12px"} opacity={".5"}>
-              Location
+            <Link to={`/user/${props.post.profileid.username}`}>
+              {props.post.profileid.username}
             </Link>
+            <Moment className="MomentSize" fromNow>
+              {props.post.created_at}
+            </Moment>
+          </VStack>
+          <VStack w={"100%"} h={"50px"} align={"end"}>
+            {props.post.profileid.id === user.id ? (
+              <Menu>
+                <MenuButton>
+                  <BiDotsHorizontalRounded
+                    fontSize={"1.75em"}
+                    cursor="pointer"
+                  />
+                </MenuButton>
+                <MenuList color={"black"}>
+                  <MenuItem onClick={deletePost} color="red">
+                    Delete
+                  </MenuItem>
+                  <MenuItem>Edit</MenuItem>
+                </MenuList>
+              </Menu>
+            ) : (
+              <Menu>
+                <MenuButton>
+                  <BiDotsHorizontalRounded
+                    fontSize={"1.75em"}
+                    cursor="pointer"
+                  />
+                </MenuButton>
+                <MenuList bg={"black"}></MenuList>
+              </Menu>
+            )}
           </VStack>
         </HStack>
         <Box w={"100%"} align={"middle"}>
@@ -142,16 +228,34 @@ function Posts(props) {
 
           <FiMessageCircle fontSize={"1.5em"} cursor="pointer" />
           <AiOutlineSend fontSize={"1.5em"} cursor="pointer" />
-          <Box align={"end"} w={"100%"}>
-            <IconButton variant="" icon={<FiBookmark fontSize={"1.6em"} />} />
-          </Box>
+          <VStack align={"end"} w={"100%"}>
+            {hasSaved ? (
+              <FaBookmark
+                color="grey"
+                className="Bookmark"
+                fontSize={"1.6em"}
+                cursor="pointer"
+                onClick={savePost}
+              />
+            ) : (
+              <FaRegBookmark
+                fontSize={"1.6em"}
+                cursor="pointer"
+                onClick={savePost}
+              />
+            )}
+          </VStack>
         </HStack>
         <VStack align={"start"} w="100%">
           {likes.length > 0 && (
-            <Link fontWeight={"bold"}>{likes.length} likes</Link>
+            <Text fontWeight={"bold"}>{likes.length} likes</Text>
           )}
           <HStack pb={3}>
-            <Link fontSize={"lg"} fontWeight={"bold"}>
+            <Link
+              to={`/user/${props.post.profileid.username}`}
+              fontSize={"lg"}
+              fontWeight={"bold"}
+            >
               {props.post.profileid.username}
             </Link>
             <Text fontSize={"md"}>{props.post.caption}</Text>
@@ -160,7 +264,7 @@ function Posts(props) {
             {comments.map((comment) => (
               <VStack align={"self-start"} pt={1}>
                 <HStack w={"100%"} spacing={3}>
-                  <Link fontSize={"sm"} fontWeight={"bold"}>
+                  <Link to={`/user/${comment.cprofileid.username}`}>
                     {comment ? comment.cprofileid.username : ""}
                   </Link>
                   <Text w={"100%"} fontSize={"xs"}>

@@ -19,7 +19,7 @@ import useUser from "../Components/useUser";
 import Logout from "../Components/Logout";
 
 function MainNav() {
-  const { userData, loading } = useUser();
+  const { userData, loading, userPosts, follows, followers } = useUser();
 
   return (
     <VStack spacing={"1em"} w={"100%"} pt={"1em"}>
@@ -39,7 +39,9 @@ function MainNav() {
             <Text fontWeight={"bold"} fontSize={"xl"}>
               {userData ? userData.profilename : ""}
             </Text>
-            <Link to="profile">@{loading ? "" : userData.username}</Link>
+            <Link to={`/user/${userData ? userData.username : ""}`}>
+              @{loading ? "" : userData ? userData.username : ""}
+            </Link>
           </Text>
           <Show below="xl">
             <FeedRN />
@@ -55,7 +57,7 @@ function MainNav() {
               <ChevronDownIcon />
             </MenuButton>
             <MenuList bg={"#171717"} border="none" borderRadius="xl">
-              <Link to="profile">
+              <Link to={`/user/${userData ? userData.username : ""}`}>
                 <MenuItem _hover={{ bg: "rgb(38,38,38, .5)" }}>
                   Profile
                 </MenuItem>
@@ -81,18 +83,19 @@ function MainNav() {
             pb={"5%"}
             pl={"2em"}
           >
-            <Text fontSize={"16px"}>
-              45 <br />
+            <Link to="/profile" fontSize={"16px"}>
+              {userPosts.length} <br />
               Posts
-            </Text>
-            <Text fontSize={"16px"}>
-              1000 <br />
+            </Link>
+            <Link to="/profile" fontSize={"16px"}>
+              {followers.length}
+              <br />
               Followers
-            </Text>
-            <Text fontSize={"16px"}>
-              500 <br />
+            </Link>
+            <Link to="/profile" fontSize={"16px"}>
+              {follows.length} <br />
               Following
-            </Text>
+            </Link>
           </HStack>
         </VStack>
       </HStack>

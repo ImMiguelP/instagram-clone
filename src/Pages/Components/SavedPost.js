@@ -36,7 +36,7 @@ import useUser from "./useUser";
 import { supabase } from "../SupaBaseClient";
 import Moment from "react-moment";
 
-function IGProfilePosts(props) {
+function SavedPost(props) {
   const { userData } = useUser();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [comment, setComment] = useState("");
@@ -47,18 +47,18 @@ function IGProfilePosts(props) {
   const [hasSaved, setHasSaved] = useState(false);
   const user = supabase.auth.user();
 
-  // comments database
+  //comments database
   const fetchComments = useCallback(async () => {
     const { data } = await supabase
       .from("comments")
       .select(
         `id, created_at, comment, cprofileid(username, avatarurl), postid`
       )
-      .filter("postid", "eq", props.post.id)
+      .filter("postid", "eq", props.post.postid.id)
       .order("created_at", { ascending: false });
 
     setComments(data);
-  }, [props.post.id]);
+  }, [props.post.postid.id]);
 
   const sendComment = async (e) => {
     e.preventDefault();
@@ -68,7 +68,7 @@ function IGProfilePosts(props) {
     await supabase.from("comments").insert({
       comment: commentToSend,
       cprofileid: user.id,
-      postid: props.post.id,
+      postid: props.post.postid.id,
     });
 
     fetchComments();
@@ -80,11 +80,11 @@ function IGProfilePosts(props) {
       await supabase
         .from("likes")
         .delete()
-        .match({ postid: props.post.id, userid: user.id });
+        .match({ postid: props.post.postid.id, userid: user.id });
     } else {
       await supabase.from("likes").insert({
         userid: user.id,
-        postid: props.post.id,
+        postid: props.post.postid.id,
       });
     }
     fetchLikes();
@@ -94,10 +94,10 @@ function IGProfilePosts(props) {
     const { data } = await supabase
       .from("likes")
       .select(`id, created_at, userid, postid`)
-      .filter("postid", "eq", props.post.id);
+      .filter("postid", "eq", props.post.postid.id);
 
     setLikes(data);
-  }, [props.post.id]);
+  }, [props.post.postid.id]);
 
   //savedposts database
 
@@ -106,11 +106,11 @@ function IGProfilePosts(props) {
       await supabase
         .from("savedposts")
         .delete()
-        .match({ postid: props.post.id, userid: user.id });
+        .match({ postid: props.post.postid.id, userid: user.id });
     } else {
       await supabase.from("savedposts").insert({
         userid: user.id,
-        postid: props.post.id,
+        postid: props.post.postid.id,
       });
     }
     fetchSavedPosts();
@@ -120,12 +120,11 @@ function IGProfilePosts(props) {
     const { data } = await supabase
       .from("savedposts")
       .select(`id, postid, userid`)
-      .filter("postid", "eq", props.post.id);
+      .filter("postid", "eq", props.post.postid.id);
     setSavedPost(data);
-  }, [props.post.id]);
+  }, [props.post.postid.id]);
 
-  //useeffects
-
+  //use effects
   useEffect(() => {
     fetchComments();
     fetchLikes();
@@ -138,7 +137,6 @@ function IGProfilePosts(props) {
   useEffect(() => {
     setHasSaved(savedPost.findIndex((save) => save.userid === user?.id) !== -1);
   }, [savedPost]);
-
   return (
     <div>
       <Box
@@ -153,7 +151,7 @@ function IGProfilePosts(props) {
       >
         <a onClick={onOpen}>
           <Image
-            src={props.post.photourl}
+            src={props.post.postid.photourl}
             alt="pht"
             objectFit={"cover"}
             height={"100%"}
@@ -178,7 +176,7 @@ function IGProfilePosts(props) {
                     width={"800px"}
                     h={"880px"}
                     objectFit={"contain"}
-                    src={props.post.photourl}
+                    src={props.post.postid.photourl}
                   />
                 </Box>
                 <Box width={"800px"} h={"880px"} background={"#1B1B1B"}>
@@ -213,7 +211,7 @@ function IGProfilePosts(props) {
                             src={userData ? userData.avatarurl : ""}
                           />
                           <Link>{userData ? userData.username : ""}</Link>
-                          <Text>{props.post.caption}</Text>
+                          <Text>{props.post.postid.caption}</Text>
                         </HStack>
                         {comments.map((comment) => {
                           return (
@@ -316,7 +314,9 @@ function IGProfilePosts(props) {
                               variant=""
                               type="submit"
                               disabled={!comment.trim()}
-                              onClick={(e) => sendComment(e, props.post.id)}
+                              onClick={(e) =>
+                                sendComment(e, props.post.postid.id)
+                              }
                               icon={<AiOutlineSend fontSize={"1.7em"} />}
                             />
                           </HStack>
@@ -342,14 +342,20 @@ function IGProfilePosts(props) {
               <ModalCloseButton />
             </ModalHeader>
             <ModalBody>
-              <Box h={"580px"} mt={"15px"} bg={"#1B1B1B"} color={"white"}>
+              <Box
+                className="border"
+                h={"580px"}
+                mt={"15px"}
+                bg={"#1B1B1B"}
+                color={"white"}
+              >
                 <HStack mt={"15px"} ml={3}>
                   <Avatar size="sm" src={userData ? userData.avatarurl : ""} />
                   <Link>{userData ? userData.username : ""}</Link>
                 </HStack>
-                <Box h={"400px"} mt={"20px"}>
+                <Box className="border" h={"400px"} mt={"20px"}>
                   <Image
-                    src={props.post.photourl}
+                    src={props.post.postid.photourl}
                     h={"100%"}
                     w={"100%"}
                     bg={"black"}
@@ -394,7 +400,7 @@ function IGProfilePosts(props) {
                 <Text pl={3}>56 likes</Text>
                 <HStack pl={3} pt={1}>
                   <Link>{userData ? userData.username : ""}</Link>
-                  <Text>{props.post.caption}</Text>
+                  <Text>{props.post.postid.caption}</Text>
                 </HStack>
               </Box>
             </ModalBody>
@@ -405,4 +411,4 @@ function IGProfilePosts(props) {
   );
 }
 
-export default IGProfilePosts;
+export default SavedPost;

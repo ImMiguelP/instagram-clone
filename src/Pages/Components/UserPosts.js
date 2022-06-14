@@ -5,7 +5,6 @@ import {
   Box,
   Avatar,
   Text,
-  Link,
   Button,
   Image,
   Modal,
@@ -35,8 +34,9 @@ import { FaBookmark, FaRegBookmark } from "react-icons/fa";
 import useUser from "./useUser";
 import { supabase } from "../SupaBaseClient";
 import Moment from "react-moment";
+import { Link } from "react-router-dom";
 
-function IGProfilePosts(props) {
+function UserPosts(props) {
   const { userData } = useUser();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [comment, setComment] = useState("");
@@ -193,9 +193,14 @@ function IGProfilePosts(props) {
                         size="sm"
                         outline={"solid"}
                         outlineColor={"rgba(255,255,255, .5)"}
-                        src={userData ? userData.avatarurl : ""}
+                        src={props.user.avatarurl}
                       />
-                      <Link>{userData ? userData.username : ""}</Link>
+                      <Link
+                        to={`/user/${props.user.username}`}
+                        onClick={onClose}
+                      >
+                        {props.user.username}
+                      </Link>
                     </HStack>
 
                     <Box h={"35em"} w={"100%"} className="Scroll">
@@ -210,9 +215,14 @@ function IGProfilePosts(props) {
                             size="sm"
                             outline={"solid"}
                             outlineColor={"rgba(255,255,255, .5)"}
-                            src={userData ? userData.avatarurl : ""}
+                            src={props.user.avatarurl}
                           />
-                          <Link>{userData ? userData.username : ""}</Link>
+                          <Link
+                            to={`/user/${props.user.username}`}
+                            onClick={onClose}
+                          >
+                            {props.user.username}
+                          </Link>
                           <Text>{props.post.caption}</Text>
                         </HStack>
                         {comments.map((comment) => {
@@ -230,7 +240,10 @@ function IGProfilePosts(props) {
                                         : ""
                                     }
                                   />
-                                  <Link>
+                                  <Link
+                                    to={`/user/${comment.cprofileid.username}`}
+                                    onClick={onClose}
+                                  >
                                     {comment ? comment.cprofileid.username : ""}
                                   </Link>
                                   <Text wordBreak={"break-all"}>
@@ -294,9 +307,9 @@ function IGProfilePosts(props) {
                             </VStack>
                           </HStack>
                           {likes.length > 0 && (
-                            <Link fontWeight={"bold"} pl={".5em"}>
+                            <Text fontWeight={"bold"} pl={".5em"}>
                               {likes.length} likes
-                            </Link>
+                            </Text>
                           )}
                         </VStack>
                       </Box>
@@ -342,12 +355,20 @@ function IGProfilePosts(props) {
               <ModalCloseButton />
             </ModalHeader>
             <ModalBody>
-              <Box h={"580px"} mt={"15px"} bg={"#1B1B1B"} color={"white"}>
-                <HStack mt={"15px"} ml={3}>
-                  <Avatar size="sm" src={userData ? userData.avatarurl : ""} />
-                  <Link>{userData ? userData.username : ""}</Link>
+              <Box
+                h={"580px"}
+                mt={"15px"}
+                bg={"#1B1B1B"}
+                color={"white"}
+                pt={1}
+              >
+                <HStack mt={"10px"} ml={3}>
+                  <Avatar size="sm" src={props.user.avatarurl} />
+                  <Link to={`/user/${props.user.username}`} onClick={onClose}>
+                    {props.user.username}
+                  </Link>
                 </HStack>
-                <Box h={"400px"} mt={"20px"}>
+                <Box h={"400px"} mt={"10px"}>
                   <Image
                     src={props.post.photourl}
                     h={"100%"}
@@ -356,7 +377,7 @@ function IGProfilePosts(props) {
                     objectFit={"contain"}
                   />
                 </Box>
-                <HStack spacing={3} pl={2}>
+                <HStack spacing={3} pl={2} pt={2}>
                   {hasLiked ? (
                     <AiFillHeart
                       color="red"
@@ -393,7 +414,9 @@ function IGProfilePosts(props) {
                 </HStack>
                 <Text pl={3}>56 likes</Text>
                 <HStack pl={3} pt={1}>
-                  <Link>{userData ? userData.username : ""}</Link>
+                  <Link to={`/user/${props.user.username}`} onClick={onClose}>
+                    {props.user.username}
+                  </Link>
                   <Text>{props.post.caption}</Text>
                 </HStack>
               </Box>
@@ -405,4 +428,4 @@ function IGProfilePosts(props) {
   );
 }
 
-export default IGProfilePosts;
+export default UserPosts;

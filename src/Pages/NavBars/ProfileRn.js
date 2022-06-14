@@ -21,6 +21,7 @@ import {
 import { AiOutlinePlusSquare } from "react-icons/ai";
 import { supabase } from "../SupaBaseClient";
 import useUser from "../Components/useUser";
+import { Link } from "react-router-dom";
 
 function ProfileRn() {
   let fileInput;
@@ -28,7 +29,6 @@ function ProfileRn() {
   const [selectedFile, setSelectedFile] = useState();
   const [preview, setPreview] = useState();
   const [text, setText] = useState("");
-  const { userData } = useUser();
 
   //Preview Upload File
   useEffect(() => {
@@ -146,7 +146,7 @@ function ProfileRn() {
           <Text>Insight</Text>
           <Text>Your Activity</Text>
           <Text>QR Code</Text>
-          <Text>Saved</Text>
+          <Link to="/savedposts">Saved</Link>
           <Text>Close Friends</Text>
           <Text>Discover People</Text>
         </VStack>

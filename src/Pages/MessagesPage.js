@@ -48,7 +48,6 @@ const MessagesPage = () => {
       "https://upload.wikimedia.org/wikipedia/commons/0/04/Pound_layer_cake.jpg",
     userName: "immiguelp",
     usersDM: "Wow this is cool!!",
-    dmReq: "1",
     active: "Active now",
     yourMsg: "Hi how are you?",
   };
@@ -68,11 +67,7 @@ const MessagesPage = () => {
           <Text fontWeight={"bold"} fontSize={"28px"}>
             Messages
           </Text>
-          <Box w="100%" align={"end"}>
-            <Link className="topIcons" color={"#1095f6"} opacity={".7"}>
-              Requests({dmFeed.dmReq})
-            </Link>
-          </Box>
+          <Box w="100%" align={"end"}></Box>
         </Box>
 
         <InputGroup className="dmInput">

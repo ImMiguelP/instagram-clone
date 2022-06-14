@@ -1,19 +1,18 @@
 import { useState, useEffect } from "react";
 import { Stack, Box, Input } from "@chakra-ui/react";
-
 import "./CSS/modules.css";
 import { supabase } from "./SupaBaseClient";
 import Stories from "./Components/Stories";
 import Posts from "./Components/Posts";
 
-const Feed = () => {
+const Feed = (props) => {
   const [posts, setPosts] = useState([]);
 
   async function fetchPosts(callback) {
     const { data } = await supabase
       .from("posts")
       .select(
-        `id, caption, created_at, photourl, profileid(username, avatarurl)`
+        `id, caption, created_at, photourl, profileid(id,username, avatarurl)`
       )
       .order("created_at", { ascending: false });
 
@@ -34,7 +33,7 @@ const Feed = () => {
       <Stories />
       {/* Post*/}
       {posts.map((post) => {
-        return <Posts post={post} />;
+        return <Posts post={post} props={props} />;
       })}
     </Stack>
   );
