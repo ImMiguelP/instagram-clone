@@ -61,10 +61,10 @@ function ProfilePage(props) {
             </HStack>
             <Box w={"100%"} align="middle">
               <HStack justify={"center"} spacing={10}>
-                <Link fontWeight={"bold"} fontSize={"20px"}>
+                <Text fontWeight={"bold"} fontSize={"20px"}>
                   {posts.length} <br />
-                  Posts
-                </Link>
+                  Postssss
+                </Text>
                 <Link fontWeight={"bold"} fontSize={"20px"}>
                   {followers.length}
                   <br />

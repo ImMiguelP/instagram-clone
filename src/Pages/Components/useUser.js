@@ -33,7 +33,7 @@ export default function useUser() {
         });
       }
     } catch (error) {
-      alert(error.message);
+      console.log(error.message);
     } finally {
       setLoading(false);
     }

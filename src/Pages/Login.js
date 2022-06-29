@@ -5,16 +5,13 @@ import {
   FormControl,
   FormLabel,
   Grid,
-  Heading,
   Input,
   Stack,
   Text,
-  useColorModeValue,
   useToast,
   Image,
   HStack,
   Hide,
-  Show,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { supabase } from "./SupaBaseClient";

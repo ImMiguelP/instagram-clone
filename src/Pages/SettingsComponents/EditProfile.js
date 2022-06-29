@@ -25,7 +25,7 @@ import { supabase } from "../SupaBaseClient";
 
 const Editprofile = () => {
   let fileInput;
-  const [userData, setUserData] = useState(null);
+  const [userData, setUserData] = useState("null");
   console.log(userData);
   const [avatar, setAvatar] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -73,11 +73,12 @@ const Editprofile = () => {
   }
 
   async function fetchUserData() {
+    const user = supabase.auth.user();
     const { data } = await supabase
       .from("profiles")
-      .select(`id, avatarurl, username, profilename, bio`)
-      .filter("id", "eq", userData.id);
-    setUserData(data);
+      .select(`id, avatarurl, username, website, profilename, bio`)
+      .filter("id", "eq", user.id);
+    setUserData(data[0]);
   }
 
   return (
@@ -190,11 +191,6 @@ const Editprofile = () => {
               <FormControl padding={5}>
                 <FormLabel htmlFor="email">Email</FormLabel>
                 <Input id="email" type="email" />
-              </FormControl>
-              {/* phone */}
-              <FormControl padding={5}>
-                <FormLabel htmlFor="phone">Phone Number</FormLabel>
-                <Input id="phone" type="phone" />
               </FormControl>
             </DrawerBody>
 

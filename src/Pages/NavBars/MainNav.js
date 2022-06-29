@@ -62,15 +62,14 @@ function MainNav() {
                   Profile
                 </MenuItem>
               </Link>
-              <MenuItem _hover={{ bg: "rgb(38,38,38, .5)" }}>Saved</MenuItem>
+              <Link to="/savedposts">
+                <MenuItem _hover={{ bg: "rgb(38,38,38, .5)" }}>Saved</MenuItem>
+              </Link>
               <Link to="settings">
                 <MenuItem _hover={{ bg: "rgb(38,38,38, .5)" }}>
                   Settings
                 </MenuItem>
               </Link>
-              <MenuItem _hover={{ bg: "rgb(38,38,38, .5)" }}>
-                Switch Accounts
-              </MenuItem>
               <MenuDivider borderColor={"rgba(255,255,255, .3)"} />
               <MenuItem _hover={{ bg: "rgb(38,38,38, .5)" }}>
                 <Logout />{" "}

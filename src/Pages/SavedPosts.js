@@ -14,7 +14,7 @@ import { supabase } from "./SupaBaseClient";
 import SavedPost from "./Components/SavedPost";
 
 function SavedPosts(props) {
-  const { userData, loading } = useUser();
+  const { userData, loading, follows, followers } = useUser();
   const [posts, setPosts] = useState([]);
   const hrefsite = userData ? "https://" + userData.website : "";
 
@@ -62,16 +62,16 @@ function SavedPosts(props) {
             <Box w={"100%"} align="middle">
               <HStack justify={"center"} spacing={10}>
                 <Link fontWeight={"bold"} fontSize={"20px"}>
-                  45 <br />
-                  Posts
+                  {posts?.length} <br />
+                  Saved Posts
                 </Link>
                 <Link fontWeight={"bold"} fontSize={"20px"}>
-                  1000
+                  {followers.length}
                   <br />
                   Followers
                 </Link>
                 <Link fontWeight={"bold"} fontSize={"20px"}>
-                  500
+                  {follows.length}
                   <br />
                   Following
                 </Link>

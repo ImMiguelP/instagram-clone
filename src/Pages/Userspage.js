@@ -24,6 +24,7 @@ function UsersPage(props) {
   const [isFollowing, setIsFollowing] = useState(false);
   const [userFollowings, setUserFollowings] = useState([]);
   const [userFollowers, setUserFollowers] = useState([]);
+  const hrefsite = userData ? "https://" + userData.website : "";
 
   //   follows account
 
@@ -126,7 +127,7 @@ function UsersPage(props) {
               />
               <VStack align={"middle"} spacing={"2"} w={"200px"}>
                 <Text>{user ? user.profilename : ""}</Text>
-                <Link>{user ? user.website : ""}</Link>
+                <Link href={hrefsite}>{user ? user.website : ""}</Link>
                 <Text wordBreak={"break-all"}>{user ? user.bio : ""}</Text>
               </VStack>
             </HStack>
@@ -149,10 +150,10 @@ function UsersPage(props) {
             </Box>
             <Box w={"100%"} align="middle" pt={5}>
               <HStack justify={"center"} spacing={10}>
-                <Link fontWeight={"bold"} fontSize={"20px"}>
+                <Text fontWeight={"bold"} fontSize={"20px"}>
                   {posts?.length} <br />
                   Posts
-                </Link>
+                </Text>
                 <Link fontWeight={"bold"} fontSize={"20px"}>
                   {userFollowers?.length}
                   <br />

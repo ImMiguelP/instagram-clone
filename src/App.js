@@ -5,9 +5,11 @@ import Account from "./Pages/Account";
 import HomePage from "./Pages/HomePage";
 import Login from "./Pages/Login";
 import { supabase } from "./Pages/SupaBaseClient";
+import useUser from "./Pages/Components/useUser";
 
 function App() {
   const [session, setSession] = useState(null);
+  const { userData } = useUser();
 
   useEffect(() => {
     setSession(supabase.auth.session());
@@ -17,7 +19,11 @@ function App() {
     });
   }, []);
 
-  return <ChakraProvider>{!session ? <Login /> : <HomePage />}</ChakraProvider>;
+  return (
+    <ChakraProvider>
+      {!session ? <Login /> : userData === null ? <Account /> : <HomePage />}
+    </ChakraProvider>
+  );
 }
 
 export default App;
