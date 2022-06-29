@@ -21,7 +21,7 @@ function App() {
 
   return (
     <ChakraProvider>
-      {!session ? <Login /> : userData === null ? <Account /> : <HomePage />}
+      {!session ? <Login /> : userData !== null ? <HomePage /> : <Account />}
     </ChakraProvider>
   );
 }

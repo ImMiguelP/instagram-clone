@@ -26,7 +26,13 @@ function Login() {
   const handleLogin = async (email) => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signIn({ email });
+      const { error } = await supabase.auth.signIn(
+        { email },
+        {
+          redirectTo:
+            process.env.REACT_APP_VERCEL_URL || "http://localhost:3000",
+        }
+      );
       if (error) throw error;
       toast({
         title: "Account Created",

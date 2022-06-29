@@ -9,19 +9,23 @@ import {
   Text,
   Textarea,
   Image,
+  Avatar,
+  Link,
+  VStack,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import PersonalAvatar from "./Components/PersonalAvatar";
 import { supabase } from "./SupaBaseClient";
 
 const Account = () => {
+  let fileInput;
   const [loading, setLoading] = useState(true);
-  const [username, setUsername] = useState(null);
+  const [userData, setUserData] = useState("null");
   const [avatarurl, setAvatarurl] = useState(null);
-  const [website, setWebsite] = useState(null);
-  const [bio, setBio] = useState(null);
-  const [profilename, setProfilename] = useState(null);
   const [updated, setUpdated] = useState(false);
+  const [uploading, setUploading] = useState(true);
+  const isInvalid = userData === "" || avatarurl === null;
+
+  console.log(avatarurl);
 
   useEffect(() => {
     fetchUserData();
@@ -31,6 +35,45 @@ const Account = () => {
     window.location.reload(false);
   }
 
+  const onSelectFile = (e) => {
+    setAvatarurl(e.target.files[0]);
+  };
+
+  async function updateProfile() {
+    try {
+      setUploading(true);
+
+      const postFile = avatarurl;
+      let newAvatarUrl = null;
+
+      if (postFile !== null) {
+        await supabase.storage
+          .from("avatars")
+          .upload(`public/${postFile.name}`, postFile, { upsert: true });
+
+        const { publicURL } = supabase.storage
+          .from("avatars")
+          .getPublicUrl(`public/${postFile.name}`);
+
+        setUserData({ ...userData, avatarurl: publicURL });
+        newAvatarUrl = publicURL;
+      }
+      const user = supabase.auth.user();
+      await supabase.from("profiles").upsert([
+        {
+          id: user.id,
+          avatarurl: newAvatarUrl ? newAvatarUrl : userData.avatarurl,
+          profilename: userData.profilename,
+          username: userData.username,
+          website: userData.website,
+          bio: userData.bio,
+        },
+      ]);
+    } finally {
+      setUploading(false);
+    }
+  }
+
   async function fetchUserData() {
     try {
       setLoading(true);
@@ -38,39 +81,8 @@ const Account = () => {
       let { data, error, status } = await supabase
         .from("profiles")
         .select(`id, avatarurl, username, website, profilename, bio`)
-        .eq("id", user.id)
-        .single();
-
-      if (data) {
-        setUsername(data.username);
-        setAvatarurl(data.avatarurl);
-        setBio(data.bio);
-        setProfilename(data.profilename);
-        setWebsite(data.website);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function updateProfile() {
-    try {
-      setLoading(true);
-      const user = supabase.auth.user();
-      const updates = {
-        id: user.id,
-        username,
-        profilename,
-        bio,
-        website,
-        avatarurl,
-      };
-      let { error } = await supabase.from("profiles").upsert(updates, {
-        returning: "minimal",
-      });
-      if (error) {
-        throw error;
-      }
+        .filter("id", "eq", user.id);
+      setUserData(data[0]);
     } finally {
       setLoading(false);
     }
@@ -104,39 +116,63 @@ const Account = () => {
                 src="https://c.tenor.com/A-ozELwp694AAAAC/thumbs-thumbs-up-kid.gif"
               />
 
-              <Button bg={"White"} color="black" onClick={refreshPage}>
+              <Button
+                bg={"White"}
+                color="black"
+                onClick={refreshPage}
+                disabled={uploading}
+              >
                 Go to home page
               </Button>
             </Box>
           ) : (
             <div>
-              <PersonalAvatar
-                url={avatarurl}
-                onUpload={(url) => {
-                  setAvatarurl(url);
-                  updateProfile({
-                    username,
-                    website,
-                    bio,
-                    profilename,
-                    avatarurl: url,
-                  });
-                }}
-              />
-              <Text
-                fontSize={"sm"}
-                fontWeight={500}
-                color={"gray.500"}
-                mb={4}
-              ></Text>
+              <VStack>
+                <Text
+                  fontSize={"sm"}
+                  fontWeight={500}
+                  color={"gray.500"}
+                  mb={4}
+                >
+                  Welcome to the creation of your profile :)
+                </Text>
+                <Avatar
+                  size={"2xl"}
+                  src={userData ? userData.avatarurl : ""}
+                  alt="Avatar"
+                  mb={4}
+                  pos={"relative"}
+                  _after={{
+                    content: '""',
+                    w: 4,
+                    h: 4,
+                    bg: "green.300",
+                    border: "2px solid white",
+                    rounded: "full",
+                    pos: "absolute",
+                    bottom: 0,
+                    right: 3,
+                  }}
+                />
+                <Input
+                  style={{ display: "none" }}
+                  type="file"
+                  ref={(refParam) => (fileInput = refParam)}
+                  onChange={onSelectFile}
+                />
+                <Link color={"#1095f6"} onClick={() => fileInput.click()}>
+                  Change Profile Photo
+                </Link>
+              </VStack>
               <Stack spacing={4} p={4}>
                 <FormControl>
                   <FormLabel>Name</FormLabel>
                   <Input
                     type={"text"}
-                    value={profilename || ""}
-                    onChange={(e) => setProfilename(e.target.value)}
-                    placeholder={profilename || "name"}
+                    value={userData ? userData.profilename : ""}
+                    onChange={(e) =>
+                      setUserData({ ...userData, profilename: e.target.value })
+                    }
                     color={("gray.800", "gray.200")}
                     bg={("gray.100", "gray.600")}
                     rounded={"full"}
@@ -153,9 +189,10 @@ const Account = () => {
                   <FormLabel>Username</FormLabel>
                   <Input
                     type={"text"}
-                    value={username || ""}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder={username || "username"}
+                    value={userData ? userData.username : " "}
+                    onChange={(e) =>
+                      setUserData({ ...userData, username: e.target.value })
+                    }
                     color={("gray.800", "gray.200")}
                     bg={("gray.100", "gray.600")}
                     rounded={"full"}
@@ -172,9 +209,10 @@ const Account = () => {
                   <FormLabel>Website</FormLabel>
                   <Input
                     type={"text"}
-                    value={website || ""}
-                    onChange={(e) => setWebsite(e.target.value)}
-                    placeholder={website || "website"}
+                    value={userData ? userData.website : " "}
+                    onChange={(e) =>
+                      setUserData({ ...userData, website: e.target.value })
+                    }
                     color={("gray.800", "gray.200")}
                     bg={("gray.100", "gray.600")}
                     rounded={"full"}
@@ -191,9 +229,10 @@ const Account = () => {
                   <FormLabel>Bio</FormLabel>
                   <Textarea
                     type={"text"}
-                    value={bio || ""}
-                    onChange={(e) => setBio(e.target.value)}
-                    placeholder={bio || " bio"}
+                    value={userData ? userData.bio : ""}
+                    onChange={(e) =>
+                      setUserData({ ...userData, bio: e.target.value })
+                    }
                     color={("gray.800", "gray.200")}
                     bg={("gray.100", "gray.600")}
                     border={0}
@@ -224,13 +263,13 @@ const Account = () => {
                   flex={1}
                   fontSize={"sm"}
                   rounded={"full"}
-                  bg={"green.400"}
                   color={"white"}
                   boxShadow={"0 5px 20px 0px rgb(72 187 120 / 43%)"}
                   _hover={{
                     bg: "teal",
                   }}
                   bg={"blue.500"}
+                  isDisabled={isInvalid}
                 >
                   {loading || "Create Account"}
                 </Button>
