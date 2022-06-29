@@ -30,7 +30,7 @@ function Login() {
         { email },
         {
           redirectTo:
-            process.env.REACT_APP_VERCEL_URL || "http://localhost:3000",
+            process.env.NEXT_PUBLIC_VERCEL_URL || "http://localhost:3000",
         }
       );
       if (error) throw error;
