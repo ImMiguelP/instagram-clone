@@ -30,8 +30,7 @@ function Login() {
         { email },
         {
           redirectTo:
-            process.env.NEXT_PUBLIC_VERCEL_URL ||
-            "https://myigclone.vercel.app/",
+            process.env.REACT_APP_VERCEL_URL || "http://localhost:3000/",
         }
       );
       if (error) throw error;

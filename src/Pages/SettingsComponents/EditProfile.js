@@ -38,7 +38,7 @@ const Editprofile = () => {
   const onSelectFile = (e) => {
     setAvatar(e.target.files[0]);
   };
-  //  h
+
   //Upload File
   async function updateProfile() {
     const postFile = avatar;

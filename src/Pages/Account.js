@@ -23,9 +23,8 @@ const Account = () => {
   const [avatarurl, setAvatarurl] = useState(null);
   const [updated, setUpdated] = useState(false);
   const [uploading, setUploading] = useState(true);
+  const [preview, setPreview] = useState();
   const isInvalid = userData === "" || avatarurl === null;
-
-  console.log(avatarurl);
 
   useEffect(() => {
     fetchUserData();
@@ -35,10 +34,27 @@ const Account = () => {
     window.location.reload(false);
   }
 
+  //Preview Upload File
+  useEffect(() => {
+    if (!avatarurl) {
+      setPreview(undefined);
+      return;
+    }
+    const objectUrl = URL.createObjectURL(avatarurl);
+    setPreview(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [avatarurl]);
+
   const onSelectFile = (e) => {
+    if (!e.target.files || e.target.files.length === 0) {
+      setAvatarurl(undefined);
+      return;
+    }
     setAvatarurl(e.target.files[0]);
   };
 
+  // update profile
   async function updateProfile() {
     try {
       setUploading(true);
@@ -138,7 +154,7 @@ const Account = () => {
                 </Text>
                 <Avatar
                   size={"2xl"}
-                  src={userData ? userData.avatarurl : ""}
+                  src={avatarurl}
                   alt="Avatar"
                   mb={4}
                   pos={"relative"}
@@ -154,6 +170,7 @@ const Account = () => {
                     right: 3,
                   }}
                 />
+                <Image src={preview} />
                 <Input
                   style={{ display: "none" }}
                   type="file"
