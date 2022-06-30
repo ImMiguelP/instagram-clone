@@ -94,7 +94,7 @@ const Account = () => {
     try {
       setLoading(true);
       const user = supabase.auth.user();
-      let { data, error, status } = await supabase
+      let { data } = await supabase
         .from("profiles")
         .select(`id, avatarurl, username, website, profilename, bio`)
         .filter("id", "eq", user.id);
@@ -154,7 +154,7 @@ const Account = () => {
                 </Text>
                 <Avatar
                   size={"2xl"}
-                  src={avatarurl}
+                  src={preview}
                   alt="Avatar"
                   mb={4}
                   pos={"relative"}
@@ -170,7 +170,6 @@ const Account = () => {
                     right: 3,
                   }}
                 />
-                <Image src={preview} />
                 <Input
                   style={{ display: "none" }}
                   type="file"

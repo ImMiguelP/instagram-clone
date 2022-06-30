@@ -28,6 +28,7 @@ const Editprofile = () => {
   const [userData, setUserData] = useState("null");
   console.log(userData);
   const [avatar, setAvatar] = useState(null);
+  const [preview, setPreview] = useState();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = React.useRef();
 
@@ -35,7 +36,23 @@ const Editprofile = () => {
     fetchUserData();
   }, []);
 
+  //Preview Upload File
+  useEffect(() => {
+    if (!avatar) {
+      setPreview(undefined);
+      return;
+    }
+    const objectUrl = URL.createObjectURL(avatar);
+    setPreview(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [avatar]);
+
   const onSelectFile = (e) => {
+    if (!e.target.files || e.target.files.length === 0) {
+      setAvatar(undefined);
+      return;
+    }
     setAvatar(e.target.files[0]);
   };
 
@@ -105,7 +122,7 @@ const Editprofile = () => {
             <DrawerCloseButton />
             <DrawerHeader>
               <Box className="settingsTop">
-                <Avatar src={userData ? userData.avatarurl : ""} />
+                <Avatar src={!preview ? userData.avatarurl : preview} />
                 <div className="settingsTopStatus">
                   <Text fontSize="md">
                     {userData ? userData.profilename : " "}
@@ -201,7 +218,7 @@ const Editprofile = () => {
                 form="my-form"
                 onClick={updateProfile}
               >
-                submit
+                Save
               </Button>
             </DrawerFooter>
           </DrawerContent>
