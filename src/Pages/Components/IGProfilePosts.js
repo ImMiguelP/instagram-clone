@@ -391,7 +391,11 @@ function IGProfilePosts(props) {
                     )}
                   </VStack>
                 </HStack>
-                <Text pl={3}>56 likes</Text>
+                {likes.length > 0 && (
+                  <Link fontWeight={"bold"} pl={".5em"}>
+                    {likes.length} likes
+                  </Link>
+                )}
                 <HStack pl={3} pt={1}>
                   <Link>{userData ? userData.username : ""}</Link>
                   <Text>{props.post.caption}</Text>

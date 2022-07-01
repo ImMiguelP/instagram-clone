@@ -51,7 +51,7 @@ function Logout() {
               Close
             </Button>
 
-            <Button variant="ghost" onClick={() => supabase.auth.signOut()}>
+            <Button variant="red" onClick={() => supabase.auth.signOut()}>
               Log Out
             </Button>
           </ModalFooter>
