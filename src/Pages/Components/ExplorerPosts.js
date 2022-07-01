@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
-  Image,
-  Button,
+  HStack,
   VStack,
   Box,
-  Input,
+  Avatar,
+  Text,
+  Button,
+  Image,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -13,34 +15,128 @@ import {
   ModalBody,
   ModalCloseButton,
   useDisclosure,
-  HStack,
-  Link,
-  Avatar,
-  IconButton,
-  InputGroup,
-  InputLeftElement,
-  Textarea,
-  Text,
   StackDivider,
+  IconButton,
+  Input,
+  FormControl,
   Hide,
   Show,
+  Stack,
 } from "@chakra-ui/react";
-import { AiOutlineHeart, AiOutlineSend, AiOutlineSmile } from "react-icons/ai";
-import { FiMessageCircle, FiBookmark } from "react-icons/fi";
+import {
+  AiOutlineHeart,
+  AiOutlineSend,
+  AiOutlineSmile,
+  AiFillHeart,
+} from "react-icons/ai";
+import { FiMessageCircle } from "react-icons/fi";
+import { FaBookmark, FaRegBookmark } from "react-icons/fa";
+import { supabase } from "../SupaBaseClient";
+import Moment from "react-moment";
+import { Link } from "react-router-dom";
 
-function ExplorerPosts({ user, img, avatar }) {
+function ExplorerPosts(props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  var w = window.innerWidth;
-  const igFeed = {
-    avatarImg:
-      "https://i.pinimg.com/originals/f6/7a/3e/f67a3e568d34894c698799485eaee514.jpg",
-    imageUrl:
-      "https://theworldpursuit.com/wp-content/uploads/2021/01/nature-captions--scaled.jpeg",
-    userName: "immiguelp",
-    likes: "120,000",
-    numOfComments: "129",
-    usersText: "Wow this is coolssssssssssss!!",
+  const [comment, setComment] = useState("");
+  const [comments, setComments] = useState([]);
+  const [likes, setLikes] = useState([]);
+  const [hasLiked, setHasLiked] = useState(false);
+  const [savedPost, setSavedPost] = useState([]);
+  const [hasSaved, setHasSaved] = useState(false);
+  const user = supabase.auth.user();
+
+  // comments database
+  const fetchComments = useCallback(async () => {
+    const { data } = await supabase
+      .from("comments")
+      .select(
+        `id, created_at, comment, cprofileid(username, avatarurl), postid`
+      )
+      .filter("postid", "eq", props.post.id)
+      .order("created_at", { ascending: false });
+
+    setComments(data);
+  }, [props.post.id]);
+
+  const sendComment = async (e) => {
+    e.preventDefault();
+    const commentToSend = comment;
+    setComment("");
+
+    await supabase.from("comments").insert({
+      comment: commentToSend,
+      cprofileid: user.id,
+      postid: props.post.id,
+    });
+
+    fetchComments();
   };
+
+  //likes database
+  const likePost = async () => {
+    if (hasLiked) {
+      await supabase
+        .from("likes")
+        .delete()
+        .match({ postid: props.post.id, userid: user.id });
+    } else {
+      await supabase.from("likes").insert({
+        userid: user.id,
+        postid: props.post.id,
+      });
+    }
+    fetchLikes();
+  };
+
+  const fetchLikes = useCallback(async () => {
+    const { data } = await supabase
+      .from("likes")
+      .select(`id, created_at, userid, postid`)
+      .filter("postid", "eq", props.post.id);
+
+    setLikes(data);
+  }, [props.post.id]);
+
+  //savedposts database
+
+  const savePost = async () => {
+    if (hasSaved) {
+      await supabase
+        .from("savedposts")
+        .delete()
+        .match({ postid: props.post.id, userid: user.id });
+    } else {
+      await supabase.from("savedposts").insert({
+        userid: user.id,
+        postid: props.post.id,
+      });
+    }
+    fetchSavedPosts();
+  };
+
+  const fetchSavedPosts = useCallback(async () => {
+    const { data } = await supabase
+      .from("savedposts")
+      .select(`id, postid, userid`)
+      .filter("postid", "eq", props.post.id);
+    setSavedPost(data);
+  }, [props.post.id]);
+
+  //useeffects
+
+  useEffect(() => {
+    fetchComments();
+    fetchLikes();
+    fetchSavedPosts();
+  }, [fetchComments, fetchLikes, fetchSavedPosts]);
+
+  useEffect(() => {
+    setHasLiked(likes.findIndex((like) => like.userid === user?.id) !== -1);
+  }, [likes]);
+  useEffect(() => {
+    setHasSaved(savedPost.findIndex((save) => save.userid === user?.id) !== -1);
+  }, [savedPost]);
+
   return (
     <div>
       <Box
@@ -55,7 +151,7 @@ function ExplorerPosts({ user, img, avatar }) {
       >
         <a onClick={onOpen}>
           <Image
-            src={img}
+            src={props.post.photourl}
             alt="pht"
             objectFit={"cover"}
             height={"100%"}
@@ -66,14 +162,13 @@ function ExplorerPosts({ user, img, avatar }) {
       </Box>
 
       {/*Modal */}
-      <Hide below={"md"}>
+      <Hide below="md">
         <Modal onClose={onClose} size={"full"} isOpen={isOpen}>
           <ModalOverlay />
           <ModalContent style={{ background: "rgba(27, 27, 27, 0.3)" }}>
             <ModalHeader color={"white"}>
               <ModalCloseButton />
             </ModalHeader>
-
             <ModalBody>
               <HStack spacing={0}>
                 <Box width={"800px"} h={"880px"} ml={"8%"}>
@@ -82,7 +177,7 @@ function ExplorerPosts({ user, img, avatar }) {
                     width={"800px"}
                     h={"880px"}
                     objectFit={"contain"}
-                    src={img}
+                    src={props.post.photourl}
                   />
                 </Box>
                 <Box width={"800px"} h={"880px"} background={"#1B1B1B"}>
@@ -97,10 +192,16 @@ function ExplorerPosts({ user, img, avatar }) {
                         size="sm"
                         outline={"solid"}
                         outlineColor={"rgba(255,255,255, .5)"}
-                        src={avatar}
+                        src={props.post.profileid.avatarurl}
                       />
-                      <Link>{user}</Link>
+                      <Link
+                        to={`/user/${props.post.profileid.username}`}
+                        onClick={onClose}
+                      >
+                        {props.post.profileid.username}
+                      </Link>
                     </HStack>
+
                     <Box h={"35em"} w={"100%"} className="Scroll">
                       <VStack
                         align={"start"}
@@ -108,58 +209,132 @@ function ExplorerPosts({ user, img, avatar }) {
                         mt={".5em"}
                         ml={2}
                       >
-                        <HStack spacing={"1em"}>
+                        <HStack>
                           <Avatar
                             size="sm"
                             outline={"solid"}
                             outlineColor={"rgba(255,255,255, .5)"}
-                            src={igFeed.avatarImg}
+                            src={props.post.profileid.avatarurl}
                           />
-                          <Link fontSize={"lg"}>{igFeed.userName}</Link>
-                          <Text fontSize={"sm"}>{igFeed.usersText}</Text>
+                          <Link
+                            to={`/user/${props.post.profileid.username}`}
+                            onClick={onClose}
+                          >
+                            {props.post.profileid.username}
+                          </Link>
+                          <Text>{props.post.caption}</Text>
                         </HStack>
+                        {comments.map((comment) => {
+                          return (
+                            <HStack w={"100%"} spacing={3} align={"middle"}>
+                              <Box w={"88%"}>
+                                <HStack align={"middle"}>
+                                  <Avatar
+                                    size="sm"
+                                    outline={"solid"}
+                                    outlineColor={"rgba(255,255,255, .5)"}
+                                    src={
+                                      comment
+                                        ? comment.cprofileid.avatarurl
+                                        : ""
+                                    }
+                                  />
+                                  <Link
+                                    to={`/user/${comment.cprofileid.username}`}
+                                    onClick={onClose}
+                                  >
+                                    {comment ? comment.cprofileid.username : ""}
+                                  </Link>
+                                  <Text wordBreak={"break-all"}>
+                                    {comment ? comment.comment : ""}
+                                  </Text>
+                                </HStack>
+                              </Box>
+                              <Stack align={"end"}>
+                                <Moment className="MomentSize" fromNow>
+                                  {comment ? comment.created_at : ""}
+                                </Moment>
+                              </Stack>
+                            </HStack>
+                          );
+                        })}
                       </VStack>
                     </Box>
 
                     <div className="Feeduser">
-                      <Box h={"6em"} mt={"-.5em"}>
-                        <VStack align={"start"} spacing={"1em"}>
-                          <HStack>
-                            <IconButton
-                              variant=""
-                              icon={<AiOutlineHeart fontSize={"1.75em"} />}
+                      <Box h={"6em"} mt={"-10px"} mb={"-30px"}>
+                        <VStack align={"start"}>
+                          <HStack w={"100%"} spacing={3}>
+                            {hasLiked ? (
+                              <AiFillHeart
+                                color="red"
+                                fontSize={"1.75em"}
+                                cursor="pointer"
+                                onClick={likePost}
+                              />
+                            ) : (
+                              <AiOutlineHeart
+                                fontSize={"1.75em"}
+                                cursor="pointer"
+                                onClick={likePost}
+                              />
+                            )}
+                            <FiMessageCircle
+                              fontSize={"1.5em"}
+                              cursor="pointer"
                             />
-                            <IconButton
-                              variant=""
-                              icon={<FiMessageCircle fontSize={"1.5em"} />}
+                            <AiOutlineSend
+                              fontSize={"1.5em"}
+                              cursor="pointer"
                             />
-                            <IconButton
-                              variant=""
-                              icon={<AiOutlineSend fontSize={"1.5em"} />}
-                            />
-                            <IconButton
-                              variant=""
-                              icon={<FiBookmark fontSize={"1.5em"} />}
-                            />
+                            <VStack align={"end"} w={"100%"} pr={2}>
+                              {hasSaved ? (
+                                <FaBookmark
+                                  color="grey"
+                                  className="Bookmark"
+                                  fontSize={"1.5em"}
+                                  cursor="pointer"
+                                  onClick={savePost}
+                                />
+                              ) : (
+                                <FaRegBookmark
+                                  fontSize={"1.5em"}
+                                  cursor="pointer"
+                                  onClick={savePost}
+                                />
+                              )}
+                            </VStack>
                           </HStack>
-                          <Link pl={".5em"}>{igFeed.likes}</Link>
+                          {likes.length > 0 && (
+                            <Text fontWeight={"bold"} pl={".5em"}>
+                              {likes.length} likes
+                            </Text>
+                          )}
                         </VStack>
                       </Box>
                     </div>
-                    <InputGroup paddingLeft={"1em"}>
-                      <InputLeftElement paddingLeft={"1em"}>
-                        <IconButton
-                          size={"xs"}
-                          variant=""
-                          icon={<AiOutlineSmile fontSize={"2.2em"} />}
-                        />
-                      </InputLeftElement>
-                      <Textarea
-                        variant="unstyled"
-                        opacity=".5"
-                        placeholder="Add Comment"
-                      />
-                    </InputGroup>
+                    <FormControl pt={3}>
+                      <Box w={"100%"}>
+                        <form>
+                          <HStack>
+                            <AiOutlineSmile fontSize={"2em"} cursor="pointer" />
+                            <Input
+                              variant={"unstyled"}
+                              value={comment}
+                              onChange={(e) => setComment(e.target.value)}
+                              placeholder="Add a comment..."
+                            />
+                            <IconButton
+                              variant=""
+                              type="submit"
+                              disabled={!comment.trim()}
+                              onClick={(e) => sendComment(e, props.post.id)}
+                              icon={<AiOutlineSend fontSize={"1.7em"} />}
+                            />
+                          </HStack>
+                        </form>
+                      </Box>
+                    </FormControl>
                   </VStack>
                 </Box>
               </HStack>
@@ -180,46 +355,75 @@ function ExplorerPosts({ user, img, avatar }) {
             </ModalHeader>
             <ModalBody>
               <Box
-                className="border"
-                h={"550px"}
-                mt={"35px"}
+                h={"580px"}
+                mt={"15px"}
                 bg={"#1B1B1B"}
                 color={"white"}
+                pt={1}
               >
-                <HStack mt={"15px"} ml={3}>
-                  <Avatar size="sm" src={avatar} />
-                  <Link>{user}</Link>
+                <HStack mt={"10px"} ml={3}>
+                  <Avatar size="sm" src={props.post.profileid.avatarurl} />
+                  <Link
+                    to={`/user/${props.post.profileid.username}`}
+                    onClick={onClose}
+                  >
+                    {props.post.profileid.username}
+                  </Link>
                 </HStack>
-                <Box className="border" h={"400px"} mt={"20px"}>
+                <Box h={"400px"} mt={"10px"}>
                   <Image
-                    src={img}
+                    src={props.post.photourl}
                     h={"100%"}
                     w={"100%"}
                     bg={"black"}
                     objectFit={"contain"}
                   />
                 </Box>
-                <HStack>
-                  <IconButton
-                    variant=""
-                    icon={<AiOutlineHeart fontSize={"1.2em"} />}
-                  />
-                  <IconButton
-                    variant=""
-                    icon={<FiMessageCircle fontSize={"1.2em"} />}
-                  />
-                  <IconButton
-                    variant=""
-                    icon={<AiOutlineSend fontSize={"1.2em"} />}
-                  />
-                  <VStack w={"100%"} alignItems={"end"}>
-                    <IconButton
-                      variant=""
-                      icon={<FiBookmark fontSize={"1.2em"} />}
+                <HStack spacing={3} pl={2} pt={2}>
+                  {hasLiked ? (
+                    <AiFillHeart
+                      color="red"
+                      fontSize={"1.5em"}
+                      cursor="pointer"
+                      onClick={likePost}
                     />
+                  ) : (
+                    <AiOutlineHeart
+                      fontSize={"1.5em"}
+                      cursor="pointer"
+                      onClick={likePost}
+                    />
+                  )}
+                  <FiMessageCircle fontSize={"1.5em"} cursor="pointer" />
+                  <AiOutlineSend fontSize={"1.5em"} cursor="pointer" />
+                  <VStack align={"end"} w={"100%"} pr={1}>
+                    {hasSaved ? (
+                      <FaBookmark
+                        color="grey"
+                        className="Bookmark"
+                        fontSize={"1.2em"}
+                        cursor="pointer"
+                        onClick={savePost}
+                      />
+                    ) : (
+                      <FaRegBookmark
+                        fontSize={"1.2em"}
+                        cursor="pointer"
+                        onClick={savePost}
+                      />
+                    )}
                   </VStack>
                 </HStack>
                 <Text pl={3}>56 likes</Text>
+                <HStack pl={3} pt={1}>
+                  <Link
+                    to={`/user/${props.post.profileid.username}`}
+                    onClick={onClose}
+                  >
+                    {props.post.profileid.username}
+                  </Link>
+                  <Text>{props.post.caption}</Text>
+                </HStack>
               </Box>
             </ModalBody>
           </ModalContent>

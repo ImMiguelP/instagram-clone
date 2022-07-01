@@ -43,8 +43,6 @@ function Posts(props) {
   const [hasSaved, setHasSaved] = useState(false);
   const user = supabase.auth.user();
 
-  console.log(props.post.id);
-
   // Delete Post
 
   const deletePost = async () => {

@@ -1,55 +1,36 @@
-import React, { useState } from "react";
-import { VStack, Input } from "@chakra-ui/react";
-
+import React, { useEffect, useState } from "react";
+import { VStack, Input, Text, Box } from "@chakra-ui/react";
 import "./CSS/modules.css";
-import { faker } from "@faker-js/faker";
 import ExplorerPosts from "./Components/ExplorerPosts";
+import { supabase } from "./SupaBaseClient";
 
-export const USERS = [];
+function ExplorerPage(props) {
+  const [posts, setPosts] = useState([]);
 
-export function createRandomUser() {
-  return {
-    userId: faker.datatype.uuid(),
-    username: faker.internet.userName(),
-    avatar: faker.image.avatar(),
-    postDate: faker.date.past(),
-    fakepost: faker.image.abstract("", "", true),
-  };
-}
-Array.from({ length: 25 }).forEach(() => {
-  USERS.push(createRandomUser());
-});
+  async function fetchPosts(callback) {
+    const { data } = await supabase
+      .from("posts")
+      .select(
+        `id, caption, created_at, photourl, profileid(id,username, avatarurl)`
+      )
+      .order("created_at", { ascending: false });
+    callback(data);
+  }
 
-function ExplorerPage() {
-  const [text, setText] = React.useState("");
-  const posts = USERS;
+  useEffect(() => {
+    fetchPosts(setPosts);
+  });
 
   return (
-    <VStack w="100%" align="center">
-      <Input
-        border="1px solid red"
-        mt={5}
-        maxW="50%"
-        value={text}
-        color={"white"}
-        onChange={(event) => setText(event.currentTarget.value)}
-      />
-
+    <VStack w="100%" align="center" pt={20}>
       <div
         style={{
           display: "flex",
           flexFlow: "row wrap",
         }}
       >
-        {posts.map((photo) => {
-          return (
-            <ExplorerPosts
-              key={photo.userId}
-              user={photo.username}
-              img={photo.fakepost}
-              avatar={photo.avatar}
-            />
-          );
+        {posts.map((post) => {
+          return <ExplorerPosts key={post.id} post={post} props={props} />;
         })}
       </div>
     </VStack>
