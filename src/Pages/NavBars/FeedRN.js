@@ -4,7 +4,6 @@ import {
   Button,
   VStack,
   Text,
-  Link,
   HStack,
   Avatar,
   Box,
@@ -24,6 +23,7 @@ import {
 import { AiOutlinePlusSquare } from "react-icons/ai";
 import { supabase } from "../SupaBaseClient";
 import { faker } from "@faker-js/faker";
+import { Link } from "react-router-dom";
 
 export const USERS = [];
 
@@ -50,7 +50,9 @@ function FeedRN() {
   const [selectedFile, setSelectedFile] = useState();
   const [preview, setPreview] = useState();
   const [text, setText] = useState("");
+  const [users, setUsers] = useState([]);
 
+  console.log(users);
   //Preview Upload File
   useEffect(() => {
     if (!selectedFile) {
@@ -99,13 +101,25 @@ function FeedRN() {
       .single();
   }
 
+  //fetch profiles
+  async function fetchUsers(callback) {
+    const user = supabase.auth.user();
+    const { data } = await supabase
+      .from("profiles")
+      .select(`id, avatarurl,  username, profilename`)
+      .limit(5)
+      .not("id", "eq", user.id);
+    callback(data);
+  }
+  useEffect(() => {
+    fetchUsers(setUsers);
+  }, []);
+
   return (
     <VStack spacing={"40px"} color={"white"} pt={{ xl: 8, base: 2 }}>
       <Hide above="md">
         <Box pb={2}>
-          <Link>
-            <AiOutlinePlusSquare fontSize={"20px"} onClick={onOpen} />
-          </Link>
+          <AiOutlinePlusSquare fontSize={"20px"} onClick={onOpen} />
         </Box>
       </Hide>
       <Hide below="md">
@@ -126,7 +140,7 @@ function FeedRN() {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent bg={"#1B1B1B"} color="white" borderRadius={10}>
-          <ModalHeader>Modal Title</ModalHeader>
+          <ModalHeader>New Post</ModalHeader>
           <ModalCloseButton />
           <ModalBody></ModalBody>
 
@@ -177,21 +191,24 @@ function FeedRN() {
 
         <HStack spacing={"50px"}>
           <Text fontSize={"18px"}>Suggestions For You</Text>
-          <Link opacity=".5">See All</Link>
         </HStack>
-        {suggestions.map((profiles) => {
+        {users.map((profiles) => {
           return (
             <Box w={"100%"} alignContent="center">
               <HStack spacing={"10px"} w={"100%"}>
                 <Box alignSelf={"flex-start"} pl={3}>
-                  <Avatar size="md" src={profiles.avatar} />{" "}
+                  <Avatar size="md" src={profiles.avatarurl} />{" "}
                 </Box>
                 <VStack pr={12} align={"start"} w={"100%"} maxW={"150px"}>
-                  <Text fontSize={"md"} noOfLines={1}>
+                  <Link
+                    to={`/user/${profiles.username}`}
+                    fontSize={"md"}
+                    noOfLines={1}
+                  >
                     {profiles.username}
-                  </Text>
+                  </Link>
                   <Text fontSize={"xs"} noOfLines={1} opacity=".3">
-                    {profiles.name}
+                    {profiles.profilename}
                   </Text>
                 </VStack>
                 <Box>

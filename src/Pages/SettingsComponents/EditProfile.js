@@ -26,7 +26,6 @@ import { supabase } from "../SupaBaseClient";
 const Editprofile = () => {
   let fileInput;
   const [userData, setUserData] = useState("null");
-  console.log(userData);
   const [avatar, setAvatar] = useState(null);
   const [preview, setPreview] = useState();
   const { isOpen, onOpen, onClose } = useDisclosure();

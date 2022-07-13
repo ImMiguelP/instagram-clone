@@ -20,7 +20,6 @@ import {
   AiOutlineSetting,
   AiOutlineVideoCamera,
   AiOutlineLogout,
-  AiOutlinePlusSquare,
 } from "react-icons/ai";
 import MessagesPage from "./MessagesPage";
 import ExplorerPage from "./ExplorerPage";

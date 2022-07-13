@@ -87,5 +87,7 @@ export default function useUser() {
     setUserPosts,
     followers,
     follows,
+
+    getProfile,
   };
 }

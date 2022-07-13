@@ -89,7 +89,7 @@ function MainNav() {
             <Link to="/profile" fontSize={"16px"}>
               {followers.length}
               <br />
-              Followers
+              Followerssssss
             </Link>
             <Link to="/profile" fontSize={"16px"}>
               {follows.length} <br />

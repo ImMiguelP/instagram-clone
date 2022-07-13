@@ -8,6 +8,7 @@ import {
   VStack,
   HStack,
   Button,
+  Spinner,
 } from "@chakra-ui/react";
 import "./CSS/modules.css";
 import { supabase } from "./SupaBaseClient";
@@ -17,11 +18,11 @@ import { Link } from "react-router-dom";
 
 const Feed = (props) => {
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const user = supabase.auth.user();
-  console.log(user.id);
-  console.log(posts.length);
 
   async function fetchPosts(callback) {
+    setLoading(true);
     const { data: followers } = await supabase
       .from("following")
       .select(`followingid`)
@@ -40,11 +41,27 @@ const Feed = (props) => {
     console.log(" posts", data, error);
 
     callback(data);
+    setLoading(false);
   }
 
   useEffect(() => {
     fetchPosts(setPosts);
   }, []);
+
+  if (loading) {
+    return (
+      <Box
+        w={"100%"}
+        h={"100%"}
+        bg={"#0E0E10"}
+        display={"flex"}
+        justifyContent={"center"}
+        alignItems={"center"}
+      >
+        <Spinner w={"100px"} h={"100px"} size="xl" color="white" />
+      </Box>
+    );
+  }
 
   return (
     <Stack px={5} color={"white"}>

@@ -37,7 +37,6 @@ import Moment from "react-moment";
 import { Link } from "react-router-dom";
 
 function UserPosts(props) {
-  const { userData } = useUser();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState([]);
@@ -45,7 +44,7 @@ function UserPosts(props) {
   const [hasLiked, setHasLiked] = useState(false);
   const [savedPost, setSavedPost] = useState([]);
   const [hasSaved, setHasSaved] = useState(false);
-  const user = supabase.auth.user();
+  const mainuser = supabase.auth.user();
 
   // comments database
   const fetchComments = useCallback(async () => {
@@ -67,7 +66,7 @@ function UserPosts(props) {
 
     await supabase.from("comments").insert({
       comment: commentToSend,
-      cprofileid: user.id,
+      cprofileid: mainuser.id,
       postid: props.post.id,
     });
 
@@ -80,10 +79,10 @@ function UserPosts(props) {
       await supabase
         .from("likes")
         .delete()
-        .match({ postid: props.post.id, userid: user.id });
+        .match({ postid: props.post.id, userid: mainuser.id });
     } else {
       await supabase.from("likes").insert({
-        userid: user.id,
+        userid: mainuser.id,
         postid: props.post.id,
       });
     }
@@ -106,10 +105,10 @@ function UserPosts(props) {
       await supabase
         .from("savedposts")
         .delete()
-        .match({ postid: props.post.id, userid: user.id });
+        .match({ postid: props.post.id, userid: mainuser.id });
     } else {
       await supabase.from("savedposts").insert({
-        userid: user.id,
+        userid: mainuser.id,
         postid: props.post.id,
       });
     }
@@ -133,10 +132,12 @@ function UserPosts(props) {
   }, [fetchComments, fetchLikes, fetchSavedPosts]);
 
   useEffect(() => {
-    setHasLiked(likes.findIndex((like) => like.userid === user?.id) !== -1);
+    setHasLiked(likes.findIndex((like) => like.userid === mainuser?.id) !== -1);
   }, [likes]);
   useEffect(() => {
-    setHasSaved(savedPost.findIndex((save) => save.userid === user?.id) !== -1);
+    setHasSaved(
+      savedPost.findIndex((save) => save.userid === mainuser?.id) !== -1
+    );
   }, [savedPost]);
 
   return (
@@ -363,9 +364,12 @@ function UserPosts(props) {
                 pt={1}
               >
                 <HStack mt={"10px"} ml={3}>
-                  <Avatar size="sm" src={props.user.avatarurl} />
-                  <Link to={`/user/${props.user.username}`} onClick={onClose}>
-                    {props.user.username}
+                  <Avatar size="sm" src={props.post.profileid.avatarurl} />
+                  <Link
+                    to={`/user/${props.post.profileid.username}`}
+                    onClick={onClose}
+                  >
+                    {props.post.profileid.username}
                   </Link>
                 </HStack>
                 <Box h={"400px"} mt={"10px"}>
@@ -413,13 +417,16 @@ function UserPosts(props) {
                   </VStack>
                 </HStack>
                 {likes.length > 0 && (
-                  <Link fontWeight={"bold"} pl={".5em"}>
+                  <Text fontWeight={"bold"} pl={".5em"}>
                     {likes.length} likes
-                  </Link>
+                  </Text>
                 )}
                 <HStack pl={3} pt={1}>
-                  <Link to={`/user/${props.user.username}`} onClick={onClose}>
-                    {props.user.username}
+                  <Link
+                    to={`/user/${props.post.profileid.username}`}
+                    onClick={onClose}
+                  >
+                    {props.post.profileid.username}
                   </Link>
                   <Text>{props.post.caption}</Text>
                 </HStack>
