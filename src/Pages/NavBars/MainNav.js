@@ -82,19 +82,19 @@ function MainNav() {
             pb={"5%"}
             pl={"2em"}
           >
-            <Link to="/user/:username" fontSize={"16px"}>
+            <Text fontSize={"16px"}>
               {userPosts.length} <br />
               Posts
-            </Link>
-            <Link to="/user/:username" fontSize={"16px"}>
+            </Text>
+            <Text t fontSize={"16px"}>
               {followers.length}
               <br />
               Followers
-            </Link>
-            <Link to="/user/:username" fontSize={"16px"}>
+            </Text>
+            <Text fontSize={"16px"}>
               {follows.length} <br />
               Following
-            </Link>
+            </Text>
           </HStack>
         </VStack>
       </HStack>
