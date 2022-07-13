@@ -122,7 +122,7 @@ const HomePage = () => {
         <GridItem>
           <Routes>
             <Route path="/" element={<FeedRN />} />
-            <Route path="/profile" element={<ProfileRn />} />
+            <Route path="/user/:username" element={<ProfileRn />} />
             <Route path="/user/:username" element={<ProfileRn />} />
             <Route path="/savedposts" element={<RN />} />
             <Route path="/explore" element={<RN />} />
